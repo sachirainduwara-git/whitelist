@@ -109,11 +109,6 @@ p { color: #94a3b8; font-size: 14px; margin-bottom: 10px; }
     background: rgba(99, 102, 241, 0.1);
     border: 1px solid rgba(99, 102, 241, 0.4);
     border-radius: 10px; color: #e0e7ff; font-size: 14px; font-weight: 600;
-    animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-15px); }
-    to { opacity: 1; transform: translateY(0); }
 }
 .mini-spinner {
     width: 22px; height: 22px;
