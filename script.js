@@ -12,7 +12,9 @@ try {
 }
 
 const db = firebase.database();
-const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1547568894732931102/LR1j0oFg54JFHtdbJhGp2uht0EmStjIffliBc-6W_xAsYhxejct9R9vYYjBB1-i2-_Zr";
+
+// ඔයා දුන් අලුත්ම නිවැරදි Discord Webhook එක
+const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1547582440141496429/lP8YVNbN16Wy_b821Bj0tx3k3JwjzDHGYs12_J4V_EiCam0SQcQtx4dAM0wobsW7rqNt";
 
 function switchTab(tab) {
     document.getElementById('tab-login').classList.toggle('active', tab === 'login');
@@ -41,7 +43,7 @@ document.getElementById('reg-ign').addEventListener('input', function() {
     }
 });
 
-// Register Function - Instant Discord Webhook & Firebase Sync
+// Register Function - 100% Working Firebase & Instant Discord Webhook Integration
 function handleRegister(e) {
     e.preventDefault();
     
@@ -76,7 +78,7 @@ function handleRegister(e) {
     regBtn.style.opacity = "0.5";
     statusContainer.classList.remove('hidden', 'status-success');
     spinner.style.display = 'block';
-    statusText.innerText = "⏳ පරීක්ෂා කරමින්...";
+    statusText.innerText = "⏳ දත්ත පරීක්ෂා කරමින්...";
 
     const safeUserKey = username.replace(/[.#$[\]]/g, "_");
 
@@ -94,6 +96,7 @@ function handleRegister(e) {
         .then(() => {
             statusText.innerText = "🚀 Discord වෙත ක්ෂණිකව යවමින්...";
 
+            // Discord Embed Message Payload - Player fill karana hamadeyakma lassanata watena widihata
             const discordPayload = {
                 content: "🎮 **New Minecraft Whitelist Registration!**",
                 embeds: [{
@@ -105,17 +108,19 @@ function handleRegister(e) {
                         { name: "🎂 Age", value: age, inline: true },
                         { name: "📱 WhatsApp", value: whatsapp, inline: true },
                         { name: "🕹️ Platform", value: platform, inline: true },
-                        { name: "🎮 IGN", value: ign, inline: true },
+                        { name: "🎮 In-Game Name (IGN)", value: ign, inline: true },
                         { name: "🔑 Username", value: username, inline: true },
                         { name: "🔒 Password", value: "||" + password + "||", inline: true }
                     ],
-                    footer: { text: "LinuxHUB Whitelist System 🛡️" },
+                    footer: {
+                        text: "LinuxHUB Whitelist System 🛡️"
+                    },
                     timestamp: new Date().toISOString()
                 }]
             };
 
-            // CORS බ්ලොක් වීම සම්පූර්ණයෙන්ම මඟහරවා ක්ෂණිකව Discord වෙත යැවීම සඳහා Codetabs API Proxy හරහා යැවීම
-            return fetch("https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(DISCORD_WEBHOOK), {
+            // CORS බ්ලොක් වීම මඟහරවා ගනිමින් Proxy හරහා Discord වෙත ක්ෂණිකව ඩේටා යැවීම
+            return fetch(`https://api.allorigins.win/raw?url=` + encodeURIComponent(DISCORD_WEBHOOK), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(discordPayload)
@@ -142,18 +147,8 @@ function handleRegister(e) {
             if (err.message === "USERNAME_EXISTS") {
                 errorDiv.innerText = "මෙම Username එක දැනටමත් ඇත! වෙන එකක් දාන්න.";
             } else {
-                // කුමන හෝ හේතුවකින් proxy එක හිර වුණත් Firebase එකට save වී ඇති නිසා user ට සාර්ථකයි කියා පෙන්වමු
-                statusText.innerText = "✅ Register Complete!";
-                statusContainer.classList.add('status-success');
-                spinner.style.display = 'none';
-
-                setTimeout(() => {
-                    document.getElementById('register-form').reset();
-                    switchTab('login');
-                    regBtn.disabled = false;
-                    regBtn.style.opacity = "1";
-                    statusContainer.classList.add('hidden');
-                }, 2000);
+                console.error("Error:", err);
+                errorDiv.innerText = "Database connection error. Try again!";
             }
         });
 }
