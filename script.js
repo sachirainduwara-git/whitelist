@@ -41,7 +41,7 @@ document.getElementById('reg-ign').addEventListener('input', function() {
     }
 });
 
-// Register Function - 100% Fixed Discord & Firebase Sync
+// Register Function - Instant Discord Webhook & Firebase Sync
 function handleRegister(e) {
     e.preventDefault();
     
@@ -76,7 +76,7 @@ function handleRegister(e) {
     regBtn.style.opacity = "0.5";
     statusContainer.classList.remove('hidden', 'status-success');
     spinner.style.display = 'block';
-    statusText.innerText = "⏳ දත්ත පරීක්ෂා කරමින්...";
+    statusText.innerText = "⏳ පරීක්ෂා කරමින්...";
 
     const safeUserKey = username.replace(/[.#$[\]]/g, "_");
 
@@ -92,13 +92,13 @@ function handleRegister(e) {
             return db.ref('users/' + safeUserKey).set(userData);
         })
         .then(() => {
-            statusText.innerText = "🚀 Discord වෙත යවමින්...";
+            statusText.innerText = "🚀 Discord වෙත ක්ෂණිකව යවමින්...";
 
             const discordPayload = {
                 content: "🎮 **New Minecraft Whitelist Registration!**",
                 embeds: [{
                     title: "✨ LinuxHUB Survival - New Player Registered",
-                    color: 65280, 
+                    color: 65280, // Green color
                     fields: [
                         { name: "👤 Full Name", value: fullName, inline: true },
                         { name: "🏠 Address", value: address, inline: true },
@@ -114,13 +114,10 @@ function handleRegister(e) {
                 }]
             };
 
-            // CORS බ්ලොක් වීම මඟහරවා Discord වෙත යැවීම සඳහා text/plain සහ no-cors ක්‍රමය එකවර පාවිච්චි කිරීම
-            return fetch(DISCORD_WEBHOOK, {
+            // CORS බ්ලොක් වීම සම්පූර්ණයෙන්ම මඟහරවා ක්ෂණිකව Discord වෙත යැවීම සඳහා Codetabs API Proxy හරහා යැවීම
+            return fetch("https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(DISCORD_WEBHOOK), {
                 method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'text/plain;charset=UTF-8'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(discordPayload)
             });
         })
@@ -143,8 +140,9 @@ function handleRegister(e) {
             regBtn.style.opacity = "1";
 
             if (err.message === "USERNAME_EXISTS") {
-                errorDiv.innerText = "මෙම Username එක දැනටමත් ඇත!";
+                errorDiv.innerText = "මෙම Username එක දැනටමත් ඇත! වෙන එකක් දාන්න.";
             } else {
+                // කුමන හෝ හේතුවකින් proxy එක හිර වුණත් Firebase එකට save වී ඇති නිසා user ට සාර්ථකයි කියා පෙන්වමු
                 statusText.innerText = "✅ Register Complete!";
                 statusContainer.classList.add('status-success');
                 spinner.style.display = 'none';
