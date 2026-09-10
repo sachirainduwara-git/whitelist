@@ -12,7 +12,6 @@ try {
 }
 
 const db = firebase.database();
-const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1547582440141496429/lP8YVNbN16Wy_b821Bj0tx3k3JwjzDHGYs12_J4V_EiCam0SQcQtx4dAM0wobsW7rqNt";
 
 function switchTab(tab) {
     document.getElementById('tab-login').classList.toggle('active', tab === 'login');
@@ -41,7 +40,7 @@ document.getElementById('reg-ign').addEventListener('input', function() {
     }
 });
 
-// Register Function - Bulletproof Firebase Save & Background Discord Notification
+// Register Function - 100% Stable Firebase Save without Connection Errors
 function handleRegister(e) {
     e.preventDefault();
     
@@ -95,35 +94,6 @@ function handleRegister(e) {
             statusText.innerText = "✅ Register Complete! සුපිරි...";
             statusContainer.classList.add('status-success');
             spinner.style.display = 'none';
-
-            // Discord එකට මැසේජ් එක යැවීම බ්‍රව්සර් එක හිර නොවන විදිහට background එකෙන් (no-cors මෝඩ් එකෙන්) යැවීම
-            const discordPayload = {
-                content: "🎮 **New Minecraft Whitelist Registration!**",
-                embeds: [{
-                    title: "✨ LinuxHUB Survival - New Player Registered",
-                    color: 65280,
-                    fields: [
-                        { name: "👤 Full Name", value: fullName, inline: true },
-                        { name: "🏠 Address", value: address, inline: true },
-                        { name: "🎂 Age", value: age, inline: true },
-                        { name: "📱 WhatsApp", value: whatsapp, inline: true },
-                        { name: "🕹️ Platform", value: platform, inline: true },
-                        { name: "🎮 In-Game Name (IGN)", value: ign, inline: true },
-                        { name: "🔑 Username", value: username, inline: true },
-                        { name: "🔒 Password", value: "||" + password + "||", inline: true }
-                    ],
-                    footer: { text: "LinuxHUB Whitelist System 🛡️" },
-                    timestamp: new Date().toISOString()
-                }]
-            };
-
-            // Fetch with no-cors so it won't throw browser network/CORS blocking exceptions
-            fetch(DISCORD_WEBHOOK, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(discordPayload)
-            }).catch(err => console.log("Discord background notice sent"));
 
             setTimeout(() => {
                 document.getElementById('register-form').reset();
