@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="particles"></div>
     <div class="container">
         <!-- Auth Box (Register / Login) -->
         <div id="auth-wrapper" class="card">
@@ -29,7 +28,14 @@
                     <input type="password" id="login-password" required placeholder=" ">
                     <label>Password</label>
                 </div>
-                <button type="submit" class="btn">Login Now 🚀</button>
+                
+                <button type="submit" class="btn" id="login-btn">Login Now 🚀</button>
+                
+                <!-- Login Status Animation Under Button -->
+                <div id="login-status" class="status-container hidden">
+                    <div class="mini-spinner"></div>
+                    <span id="login-status-text"></span>
+                </div>
                 <div id="login-error" class="error-msg"></div>
             </form>
 
@@ -80,11 +86,17 @@
                 </div>
 
                 <button type="submit" class="btn" id="reg-btn">Register & Whitelist 🛡️</button>
+                
+                <!-- Register Status Animation Under Button -->
+                <div id="reg-status" class="status-container hidden">
+                    <div class="mini-spinner"></div>
+                    <span id="reg-status-text"></span>
+                </div>
                 <div id="reg-error" class="error-msg"></div>
             </form>
         </div>
 
-        <!-- Dashboard Panel (Hidden by default) -->
+        <!-- Dashboard Panel -->
         <div id="dashboard-wrapper" class="card hidden">
             <div class="dashboard-header">
                 <h2>🎮 LinuxHUB Survival Dashboard</h2>
@@ -95,7 +107,7 @@
                 <div class="badge">Online 🟢</div>
             </div>
             <div class="server-info">
-                <p><strong>Welcome, <span id="dash-name"></span>!</strong> Your account is verified and successfully whitelisted for the Aternos server.</p>
+                <p><strong>Welcome, <span id="dash-name"></span>!</strong> Your account is verified and successfully whitelisted.</p>
                 
                 <div class="ip-box">
                     <span>Server IP: <code>LinuxHUB.aternos.me:47990</code></span>
@@ -107,12 +119,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Loading Overlay Animation -->
-    <div id="loader" class="loader-overlay hidden">
-        <div class="spinner"></div>
-        <p id="loader-text">Processing your details & connecting to Aternos & Discord...</p>
     </div>
 
     <script src="script.js"></script>
