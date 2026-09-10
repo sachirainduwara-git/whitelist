@@ -1,6 +1,12 @@
-// Firebase Configuration
+// Firebase Configuration with Correct Database URL
 const firebaseConfig = {
-    databaseURL: "https://whitelist-a804a-default-rtdb.firebaseio.com"
+    apiKey: "AIzaSyDummyKeyForCompatibilityModeOnly12345",
+    authDomain: "whitelist-a804a.firebaseapp.com",
+    databaseURL: "https://whitelist-a804a-default-rtdb.firebaseio.com",
+    projectId: "whitelist-a804a",
+    storageBucket: "whitelist-a804a.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:1234567890:web:abcdef123456"
 };
 
 try {
@@ -74,9 +80,8 @@ function handleRegister(e) {
     regBtn.style.opacity = "0.5";
     statusContainer.classList.remove('hidden', 'status-success');
     spinner.style.display = 'block';
-    statusText.innerText = "⏳ පරීක්ෂා කරමින්...";
+    statusText.innerText = "⏳ දත්ත පරීක්ෂා කරමින්...";
 
-    // Sanitize username to be safe for Firebase path (remove dots or special characters if any)
     const safeUserKey = username.replace(/[.#$[\]]/g, "_");
 
     db.ref('users/' + safeUserKey).once('value')
@@ -85,15 +90,14 @@ function handleRegister(e) {
                 throw new Error("USERNAME_EXISTS");
             }
             
-            statusText.innerText = "💾 Save වෙමින්...";
+            statusText.innerText = "💾 Database එකට Save වෙමින්...";
             const userData = { fullName, address, age, whatsapp, platform, ign, username, password };
             
             return db.ref('users/' + safeUserKey).set(userData);
         })
         .then(() => {
-            statusText.innerText = "🚀 Discord යවමින්...";
+            statusText.innerText = "🚀 Discord වෙත යවමින්...";
 
-            // Send to Discord Webhook via fetch proxy safely
             const discordPayload = {
                 content: "🚀 **New Minecraft Whitelist Registration!**",
                 embeds: [{
@@ -115,7 +119,7 @@ function handleRegister(e) {
                 body: JSON.stringify(discordPayload)
             }).catch(() => {});
 
-            statusText.innerText = "✅ Register Complete!";
+            statusText.innerText = "✅ Register Complete! සුපිරි...";
             statusContainer.classList.add('status-success');
             spinner.style.display = 'none';
 
@@ -125,7 +129,7 @@ function handleRegister(e) {
                 regBtn.disabled = false;
                 regBtn.style.opacity = "1";
                 statusContainer.classList.add('hidden');
-            }, 1800);
+            }, 2000);
         })
         .catch((err) => {
             statusContainer.classList.add('hidden');
@@ -133,7 +137,7 @@ function handleRegister(e) {
             regBtn.style.opacity = "1";
 
             if (err.message === "USERNAME_EXISTS") {
-                errorDiv.innerText = "මෙම Username එක දැනටමත් ඇත!";
+                errorDiv.innerText = "මෙම Username එක දැනටමත් ඇත! වෙන එකක් දෙන්න.";
             } else {
                 console.error(err);
                 errorDiv.innerText = "Database connection error. Try again!";
@@ -185,11 +189,10 @@ function handleLogin(e) {
                 loginBtn.disabled = false;
                 loginBtn.style.opacity = "1";
                 statusContainer.classList.add('hidden');
-            }, 1200);
+            }, 1500);
         })
         .catch((err) => {
             statusContainer.classList.add('hidden');
-            loginBtn.disabled.value = false;
             loginBtn.disabled = false;
             loginBtn.style.opacity = "1";
             errorDiv.innerText = "Username හෝ Password වැරදියි!";
