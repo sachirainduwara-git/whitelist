@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinuxHUB - Minecraft Whitelist Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="particles"></div>
+    <div class="container">
+        <!-- Auth Box (Register / Login) -->
+        <div id="auth-wrapper" class="card">
+            <div class="tabs">
+                <button id="tab-login" class="active" onclick="switchTab('login')">Login 🎮</button>
+                <button id="tab-register" onclick="switchTab('register')">Register ✨</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="form active" onsubmit="handleLogin(event)">
+                <h2>Welcome Back! 👋</h2>
+                <p>Login to access your LinuxHUB Survival dashboard.</p>
+                <div class="input-group">
+                    <input type="text" id="login-username" required placeholder=" ">
+                    <label>Username</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="login-password" required placeholder=" ">
+                    <label>Password</label>
+                </div>
+                <button type="submit" class="btn">Login Now 🚀</button>
+                <div id="login-error" class="error-msg"></div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="form" onsubmit="handleRegister(event)">
+                <h2>Create Account 🌟</h2>
+                <p>Join the ultimate Aternos whitelist system!</p>
+                
+                <div class="input-group">
+                    <input type="text" id="reg-fullname" required placeholder=" ">
+                    <label>Full Name</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="reg-address" required placeholder=" ">
+                    <label>Address</label>
+                </div>
+                <div class="input-group">
+                    <input type="number" id="reg-age" required placeholder=" ">
+                    <label>Age</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="reg-whatsapp" required placeholder=" ">
+                    <label>WhatsApp Phone Number</label>
+                </div>
+                <div class="input-group">
+                    <select id="reg-platform" onchange="togglePlatform()" required>
+                        <option value="" disabled selected></option>
+                        <option value="Java">Java Edition</option>
+                        <option value="Bedrock">Bedrock Edition</option>
+                    </select>
+                    <label>Select Minecraft Platform</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="reg-ign" required placeholder=" ">
+                    <label id="ign-label">In-Game Name (IGN)</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="reg-username" required placeholder=" ">
+                    <label>Username</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="reg-password" required placeholder=" ">
+                    <label>Password</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="reg-confirmpass" required placeholder=" ">
+                    <label>Confirm Password</label>
+                </div>
+
+                <button type="submit" class="btn" id="reg-btn">Register & Whitelist 🛡️</button>
+                <div id="reg-error" class="error-msg"></div>
+            </form>
+        </div>
+
+        <!-- Dashboard Panel (Hidden by default) -->
+        <div id="dashboard-wrapper" class="card hidden">
+            <div class="dashboard-header">
+                <h2>🎮 LinuxHUB Survival Dashboard</h2>
+                <button onclick="logout()" class="logout-btn">Logout 🚪</button>
+            </div>
+            <div class="server-banner">
+                <img src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80" alt="Minecraft Server">
+                <div class="badge">Online 🟢</div>
+            </div>
+            <div class="server-info">
+                <p><strong>Welcome, <span id="dash-name"></span>!</strong> Your account is verified and successfully whitelisted for the Aternos server.</p>
+                
+                <div class="ip-box">
+                    <span>Server IP: <code>LinuxHUB.aternos.me:47990</code></span>
+                    <button onclick="copyIP()" class="copy-btn">Copy IP 📋</button>
+                </div>
+
+                <div class="links-section">
+                    <a href="https://aternos.org/players/whitelist" target="_blank" class="ext-btn">Check Aternos Whitelist 🌍</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay Animation -->
+    <div id="loader" class="loader-overlay hidden">
+        <div class="spinner"></div>
+        <p id="loader-text">Processing your details & connecting to Aternos & Discord...</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
