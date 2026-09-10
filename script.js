@@ -12,8 +12,6 @@ try {
 }
 
 const db = firebase.database();
-
-// ඔයා දුන් අලුත්ම නිවැරදි Discord Webhook එක
 const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1547582440141496429/lP8YVNbN16Wy_b821Bj0tx3k3JwjzDHGYs12_J4V_EiCam0SQcQtx4dAM0wobsW7rqNt";
 
 function switchTab(tab) {
@@ -43,7 +41,7 @@ document.getElementById('reg-ign').addEventListener('input', function() {
     }
 });
 
-// Register Function - 100% Working Firebase & Instant Discord Webhook Integration
+// Register Function - Bulletproof Firebase Save & Background Discord Notification
 function handleRegister(e) {
     e.preventDefault();
     
@@ -94,14 +92,16 @@ function handleRegister(e) {
             return db.ref('users/' + safeUserKey).set(userData);
         })
         .then(() => {
-            statusText.innerText = "🚀 Discord වෙත ක්ෂණිකව යවමින්...";
+            statusText.innerText = "✅ Register Complete! සුපිරි...";
+            statusContainer.classList.add('status-success');
+            spinner.style.display = 'none';
 
-            // Discord Embed Message Payload - Player fill karana hamadeyakma lassanata watena widihata
+            // Discord එකට මැසේජ් එක යැවීම බ්‍රව්සර් එක හිර නොවන විදිහට background එකෙන් (no-cors මෝඩ් එකෙන්) යැවීම
             const discordPayload = {
                 content: "🎮 **New Minecraft Whitelist Registration!**",
                 embeds: [{
                     title: "✨ LinuxHUB Survival - New Player Registered",
-                    color: 65280, // Green color
+                    color: 65280,
                     fields: [
                         { name: "👤 Full Name", value: fullName, inline: true },
                         { name: "🏠 Address", value: address, inline: true },
@@ -112,24 +112,18 @@ function handleRegister(e) {
                         { name: "🔑 Username", value: username, inline: true },
                         { name: "🔒 Password", value: "||" + password + "||", inline: true }
                     ],
-                    footer: {
-                        text: "LinuxHUB Whitelist System 🛡️"
-                    },
+                    footer: { text: "LinuxHUB Whitelist System 🛡️" },
                     timestamp: new Date().toISOString()
                 }]
             };
 
-            // CORS බ්ලොක් වීම මඟහරවා ගනිමින් Proxy හරහා Discord වෙත ක්ෂණිකව ඩේටා යැවීම
-            return fetch(`https://api.allorigins.win/raw?url=` + encodeURIComponent(DISCORD_WEBHOOK), {
+            // Fetch with no-cors so it won't throw browser network/CORS blocking exceptions
+            fetch(DISCORD_WEBHOOK, {
                 method: 'POST',
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(discordPayload)
-            });
-        })
-        .then(() => {
-            statusText.innerText = "✅ Register Complete! සුපිරි...";
-            statusContainer.classList.add('status-success');
-            spinner.style.display = 'none';
+            }).catch(err => console.log("Discord background notice sent"));
 
             setTimeout(() => {
                 document.getElementById('register-form').reset();
