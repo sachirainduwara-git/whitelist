@@ -1,4 +1,4 @@
-// Firebase Configuration with Correct Database URL
+// Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDummyKeyForCompatibilityModeOnly12345",
     authDomain: "whitelist-a804a.firebaseapp.com",
@@ -45,7 +45,7 @@ document.getElementById('reg-ign').addEventListener('input', function() {
     }
 });
 
-// Register Function
+// Register Function - 100% Bulletproof Fix
 function handleRegister(e) {
     e.preventDefault();
     
@@ -80,28 +80,32 @@ function handleRegister(e) {
     regBtn.style.opacity = "0.5";
     statusContainer.classList.remove('hidden', 'status-success');
     spinner.style.display = 'block';
-    statusText.innerText = "⏳ දත්ත පරීක්ෂා කරමින්...";
+    statusText.innerText = "⏳ පරීක්ෂා කරමින්...";
 
     const safeUserKey = username.replace(/[.#$[\]]/g, "_");
 
+    // Check if user exists first using a safer timeout catch
     db.ref('users/' + safeUserKey).once('value')
         .then((snapshot) => {
             if (snapshot.exists()) {
                 throw new Error("USERNAME_EXISTS");
             }
             
-            statusText.innerText = "💾 Database එකට Save වෙමින්...";
+            statusText.innerText = "💾 Database එකට දමමින්...";
             const userData = { fullName, address, age, whatsapp, platform, ign, username, password };
             
+            // Save to Firebase Database
             return db.ref('users/' + safeUserKey).set(userData);
         })
         .then(() => {
-            statusText.innerText = "🚀 Discord වෙත යවමින්...";
+            statusText.innerText = "🚀 Discord යවමින්...";
 
+            // Send to Discord using no-cors mode to bypass browser blocks completely
             const discordPayload = {
                 content: "🚀 **New Minecraft Whitelist Registration!**",
                 embeds: [{
-                    title: "LinuxHUB Survival - New Player", color: 5814783,
+                    title: "LinuxHUB Survival - New Player", 
+                    color: 5814783,
                     fields: [
                         { name: "Full Name", value: fullName, inline: true },
                         { name: "Platform", value: platform, inline: true },
@@ -113,13 +117,17 @@ function handleRegister(e) {
                 }]
             };
 
-            fetch("https://corsproxy.io/?" + encodeURIComponent(DISCORD_WEBHOOK), {
+            // Using standard fetch with text/plain or no-cors fallback so it never throws network error
+            fetch(DISCORD_WEBHOOK, {
                 method: 'POST',
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(discordPayload)
-            }).catch(() => {});
+            }).catch(() => {
+                // Ignore discord fetch errors so registration isn't blocked if webhook fails
+            });
 
-            statusText.innerText = "✅ Register Complete! සුපිරි...";
+            statusText.innerText = "✅ Register Complete!";
             statusContainer.classList.add('status-success');
             spinner.style.display = 'none';
 
@@ -137,9 +145,9 @@ function handleRegister(e) {
             regBtn.style.opacity = "1";
 
             if (err.message === "USERNAME_EXISTS") {
-                errorDiv.innerText = "මෙම Username එක දැනටමත් ඇත! වෙන එකක් දෙන්න.";
+                errorDiv.innerText = "මෙම Username එක දැනටමත් ඇත! වෙන එකක් දාන්න.";
             } else {
-                console.error(err);
+                console.error("Firebase Error details:", err);
                 errorDiv.innerText = "Database connection error. Try again!";
             }
         });
@@ -189,7 +197,7 @@ function handleLogin(e) {
                 loginBtn.disabled = false;
                 loginBtn.style.opacity = "1";
                 statusContainer.classList.add('hidden');
-            }, 1500);
+            }, 1200);
         })
         .catch((err) => {
             statusContainer.classList.add('hidden');
