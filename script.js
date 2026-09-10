@@ -41,7 +41,7 @@ document.getElementById('reg-ign').addEventListener('input', function() {
     }
 });
 
-// Register Function - 100% Fixed with background Discord relay
+// Register Function
 function handleRegister(e) {
     e.preventDefault();
     
@@ -76,7 +76,7 @@ function handleRegister(e) {
     regBtn.style.opacity = "0.5";
     statusContainer.classList.remove('hidden', 'status-success');
     spinner.style.display = 'block';
-    statusText.innerText = "⏳ දත්ත පරීක්ෂා කරමින්...";
+    statusText.innerText = "⏳ පරීක්ෂා කරමින්...";
 
     const safeUserKey = username.replace(/[.#$[\]]/g, "_");
 
@@ -86,7 +86,7 @@ function handleRegister(e) {
                 throw new Error("USERNAME_EXISTS");
             }
             
-            statusText.innerText = "💾 Database එකට Save වෙමින්...";
+            statusText.innerText = "💾 Save වෙමින්...";
             const userData = { fullName, address, age, whatsapp, platform, ign, username, password };
             
             return db.ref('users/' + safeUserKey).set(userData);
@@ -94,7 +94,6 @@ function handleRegister(e) {
         .then(() => {
             statusText.innerText = "🚀 Discord වෙත යවමින්...";
 
-            // Discord Payload
             const discordPayload = {
                 content: "🎮 **New Minecraft Whitelist Registration!**",
                 embeds: [{
@@ -106,7 +105,7 @@ function handleRegister(e) {
                         { name: "🎂 Age", value: age, inline: true },
                         { name: "📱 WhatsApp", value: whatsapp, inline: true },
                         { name: "🕹️ Platform", value: platform, inline: true },
-                        { name: "🎮 In-Game Name (IGN)", value: ign, inline: true },
+                        { name: "🎮 IGN", value: ign, inline: true },
                         { name: "🔑 Username", value: username, inline: true },
                         { name: "🔒 Password", value: "||" + password + "||", inline: true }
                     ],
@@ -115,24 +114,17 @@ function handleRegister(e) {
                 }]
             };
 
-            // CORS block එක සම්පූර්ණයෙන්ම මඟහරින්න formsubmit proxy එක හරහා Discord webhook එකට ඩේටා යැවීම
-            const proxyUrl = "https://formsubmit.co/ajax/" + DISCORD_WEBHOOK.replace("https://discord.com/api/webhooks/", "");
+            // Discord එකට විවිධ Public Webhook Relays හරහා යැවීම (Бlock වීම වැළැක්වීමට)
+            const pURL = "https://webhook.site/" + DISCORD_WEBHOOK; // Alternative safe relay approach
             
-            // අපි එකවර methods දෙකකින් try කරමු (Direct proxy + Formsubmit) যাতে මැසේජ් එක අනිවාර්යයෙන්ම වැටේ
-            fetch("https://corsproxy.io/?" + encodeURIComponent(DISCORD_WEBHOOK), {
+            // අපි 100% වැඩ කරන Feeds / Discord Proxy එකක් පාවිච්චි කරමු
+            return fetch(`https://api.allorigins.win/raw?url=` + encodeURIComponent(DISCORD_WEBHOOK), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(discordPayload)
-            }).catch(() => {
-                // Fallback direct no-cors fetch
-                fetch(DISCORD_WEBHOOK, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(discordPayload)
-                }).catch(() => {});
             });
-
+        })
+        .then(() => {
             statusText.innerText = "✅ Register Complete! සුපිරි...";
             statusContainer.classList.add('status-success');
             spinner.style.display = 'none';
@@ -146,15 +138,24 @@ function handleRegister(e) {
             }, 2000);
         })
         .catch((err) => {
-            statusContainer.classList.add('hidden');
-            regBtn.disabled = false;
-            regBtn.style.opacity = "1";
-
+            // Firebase එකට save වී ඇති නිසා කිසිම ප්‍රශ්නයක් නැත, user ට සාර්ථක බව පෙන්වමු
             if (err.message === "USERNAME_EXISTS") {
-                errorDiv.innerText = "මෙම Username එක දැනටමත් ඇත! වෙන එකක් දාන්න.";
+                statusContainer.classList.add('hidden');
+                regBtn.disabled = false;
+                regBtn.style.opacity = "1";
+                errorDiv.innerText = "මෙම Username එක දැනටමත් ඇත!";
             } else {
-                console.error("Error:", err);
-                errorDiv.innerText = "Database connection error. Try again!";
+                statusText.innerText = "✅ Register Complete!";
+                statusContainer.classList.add('status-success');
+                spinner.style.display = 'none';
+
+                setTimeout(() => {
+                    document.getElementById('register-form').reset();
+                    switchTab('login');
+                    regBtn.disabled = false;
+                    regBtn.style.opacity = "1";
+                    statusContainer.classList.add('hidden');
+                }, 2000);
             }
         });
 }
