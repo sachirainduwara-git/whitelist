@@ -1,4 +1,12 @@
-const FIREBASE_URL = "https://whitelist-a804a-default-rtdb.firebaseio.com";
+// Firebase Configuration for SDK
+const firebaseConfig = {
+    databaseURL: "https://whitelist-a804a-default-rtdb.firebaseio.com"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1547513458856042537/Ly_6vwpkuMHN7gwBFUFmuEEcdvvHJVEnqL-svRpXHNdfybyC_Yl9J5SUUiQDD5nZMksp";
 
 function switchTab(tab) {
@@ -28,7 +36,6 @@ document.getElementById('reg-ign').addEventListener('input', function() {
     }
 });
 
-// Delay function for smooth animation viewing
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function handleRegister(e) {
@@ -58,7 +65,6 @@ async function handleRegister(e) {
 
     if (platform === 'Bedrock' && !ign.startsWith('.')) ign = '.' + ign;
 
-    // Start Animation Process
     regBtn.disabled = true;
     regBtn.style.opacity = "0.5";
     statusContainer.classList.remove('hidden', 'status-success');
@@ -67,34 +73,25 @@ async function handleRegister(e) {
     const updateStatus = (text) => { statusText.innerText = text; };
 
     try {
-        // STEP 1: Check existing details
         updateStatus("⏳ තොරතුරු පරීක්ෂා කරමින්...");
-        await delay(800);
+        await delay(600);
 
-        const checkRes = await fetch(`${FIREBASE_URL}/users/${username}.json`);
-        if (!checkRes.ok) throw new Error("FIREBASE_RULES_ERROR");
-        const existingData = await checkRes.json();
-        
-        if (existingData) {
+        // Check user existence using Firebase SDK
+        const snapshot = await db.ref('users/' + username).once('value');
+        if (snapshot.exists()) {
             throw new Error("USERNAME_EXISTS");
         }
 
-        // STEP 2: Save to Firebase
         updateStatus("💾 Firebase වෙත Save වෙමින්...");
-        await delay(800);
+        await delay(600);
 
         const userData = { fullName, address, age, whatsapp, platform, ign, username, password };
-        const saveRes = await fetch(`${FIREBASE_URL}/users/${username}.json`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
-        });
+        
+        // Save to Firebase using SDK
+        await db.ref('users/' + username).set(userData);
 
-        if (!saveRes.ok) throw new Error("FIREBASE_RULES_ERROR");
-
-        // STEP 3: Send to Discord
         updateStatus("🚀 Discord වෙත යවමින්...");
-        await delay(600);
+        await delay(500);
 
         const discordPayload = {
             content: "🚀 **New Minecraft Whitelist Registration!**",
@@ -111,17 +108,14 @@ async function handleRegister(e) {
             }]
         };
 
-        // Bypass CORS Error with proxy
+        // Send to Discord via Proxy
         const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(DISCORD_WEBHOOK);
-        try {
-            await fetch(proxyUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(discordPayload)
-            });
-        } catch(e) { console.log("Discord proxy warning ignored"); }
+        fetch(proxyUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(discordPayload)
+        }).catch(() => {});
 
-        // STEP 4: Complete
         updateStatus("✅ Register Complete! සුපිරි...");
         statusContainer.classList.add('status-success');
         spinner.style.display = 'none';
@@ -132,7 +126,7 @@ async function handleRegister(e) {
             regBtn.disabled = false;
             regBtn.style.opacity = "1";
             statusContainer.classList.add('hidden');
-        }, 2500);
+        }, 2000);
 
     } catch (err) {
         statusContainer.classList.add('hidden');
@@ -141,10 +135,9 @@ async function handleRegister(e) {
 
         if (err.message === "USERNAME_EXISTS") {
             errorDiv.innerText = "මෙම Username එක දැනටමත් ඇත! වෙන එකක් දෙන්න.";
-        } else if (err.message === "FIREBASE_RULES_ERROR") {
-            errorDiv.innerText = "Database Error! Firebase Rules (read/write) 'true' කර නැත!";
         } else {
-            errorDiv.innerText = "Connection error. Please try again.";
+            console.error(err);
+            errorDiv.innerText = "Connection error. Please check your internet.";
         }
     }
 }
@@ -168,13 +161,15 @@ async function handleLogin(e) {
     statusText.innerText = "🔐 Verify කරමින්...";
 
     try {
-        await delay(800);
-        const response = await fetch(`${FIREBASE_URL}/users/${username}.json`);
-        if (!response.ok) throw new Error("FIREBASE_RULES_ERROR");
+        await delay(600);
+        const snapshot = await db.ref('users/' + username).once('value');
         
-        const user = await response.json();
+        if (!snapshot.exists()) {
+            throw new Error("INVALID_LOGIN");
+        }
 
-        if (!user || user.password !== password) {
+        const user = snapshot.val();
+        if (user.password !== password) {
             throw new Error("INVALID_LOGIN");
         }
 
@@ -195,12 +190,7 @@ async function handleLogin(e) {
         statusContainer.classList.add('hidden');
         loginBtn.disabled = false;
         loginBtn.style.opacity = "1";
-
-        if (err.message === "FIREBASE_RULES_ERROR") {
-            errorDiv.innerText = "Database Error! Firebase Rules 'true' කර නැත!";
-        } else {
-            errorDiv.innerText = "Account එකක් නැත හෝ Username/Password වැරදියි!";
-        }
+        errorDiv.innerText = "Account එකක් නැත හෝ Username/Password වැරදියි!";
     }
 }
 
